@@ -5,19 +5,37 @@ Interactive Streamlit Application connecting dynamically to Monday.com.
 
 import os
 import sys
+
+# Add parent directory and current directory to sys.path
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+PARENT_DIR = os.path.abspath(os.path.join(CURRENT_DIR, ".."))
+for p in [PARENT_DIR, CURRENT_DIR]:
+    if p not in sys.path:
+        sys.path.insert(0, p)
+
 import streamlit as st
 import pandas as pd
 from dotenv import load_dotenv
 
-# Ensure root directory is in sys.path
-sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
-
-from src.monday_client import MondayDataClient
-from src.agent import SkylarkBIAgent
-from src.metrics import audit_data_quality
-
-# Load environment variables
 load_dotenv()
+
+# Read secrets safely from Streamlit secrets or OS environment
+def get_secret(key: str, default: str = "") -> str:
+    if hasattr(st, "secrets") and key in st.secrets:
+        return str(st.secrets[key]).strip()
+    return os.getenv(key, default).strip()
+
+# Resilient imports supporting direct execution inside src/
+try:
+    from src.monday_client import MondayDataClient
+    from src.agent import SkylarkBIAgent
+    from src.normalization import normalize_deals_df, normalize_work_orders_df
+    from src.metrics import audit_data_quality
+except ModuleNotFoundError:
+    from monday_client import MondayDataClient
+    from agent import SkylarkBIAgent
+    from normalization import normalize_deals_df, normalize_work_orders_df
+    from metrics import audit_data_quality
 
 st.set_page_config(
     page_title="Skylark Drones | Executive BI Agent",
@@ -35,23 +53,23 @@ st.sidebar.caption("Executive Intelligence for Monday.com")
 with st.sidebar.expander("🔑 Connection & API Settings", expanded=False):
     monday_token = st.text_input(
         "Monday API Token",
-        value=os.getenv("MONDAY_API_TOKEN", ""),
+        value=get_secret("MONDAY_API_TOKEN", ""),
         type="password",
         help="Personal API Token v2 from Monday.com"
     )
     deals_board_id = st.text_input(
         "Deals Board ID",
-        value=os.getenv("DEALS_BOARD_ID", "5030962471"),
+        value=get_secret("DEALS_BOARD_ID", "5030962471"),
         help="Numeric Board ID for Deals tracker."
     )
     wo_board_id = st.text_input(
         "Work Orders Board ID",
-        value=os.getenv("WORK_ORDERS_BOARD_ID", "5030962593"),
+        value=get_secret("WORK_ORDERS_BOARD_ID", "5030962593"),
         help="Numeric Board ID for Work Orders tracker."
     )
     gemini_key = st.text_input(
         "Gemini API Key",
-        value=os.getenv("GEMINI_API_KEY", ""),
+        value=get_secret("GEMINI_API_KEY", ""),
         type="password",
         help="Google Gemini API Key."
     )
@@ -59,12 +77,10 @@ with st.sidebar.expander("🔑 Connection & API Settings", expanded=False):
 refresh_btn = st.sidebar.button("🔄 Refresh Data from Monday.com", use_container_width=True)
 
 # ---------------------------------------------------------
-# Dynamic Data Ingestion
+# Dynamic Data Ingestion Layer
 # ---------------------------------------------------------
 @st.cache_data(ttl=300, show_spinner=False)
 def get_cached_board_data(token: str, deals_id: str, wo_id: str):
-    from src.normalization import normalize_deals_df, normalize_work_orders_df
-
     if not token or not deals_id or not wo_id:
         return None, None, {"status": "unconfigured", "message": "Missing credentials or Board IDs."}
 
@@ -100,7 +116,7 @@ st.sidebar.subheader("📡 Data Feed Health")
 if isinstance(conn_status, dict) and conn_status.get("status") == "connected":
     st.sidebar.success(f"Connected to Monday.com API\n\n• Deals Board: `{len(deals_df)} items`\n• Work Orders: `{len(wo_df)} items`")
 elif isinstance(conn_status, dict) and conn_status.get("status") == "unconfigured":
-    st.sidebar.warning("⚠️ Credentials not configured in .env or sidebar.")
+    st.sidebar.warning("⚠️ Credentials not configured in Streamlit Secrets.")
 else:
     err_text = conn_status.get("message", "Unknown error") if isinstance(conn_status, dict) else str(conn_status)
     st.sidebar.error(f"❌ Connection Error: {err_text}")
