@@ -11,45 +11,7 @@ An AI-powered Business Intelligence Agent that answers founder-level commercial 
 - **GitHub Repository**: [https://github.com/hiransuresh/monday-bi-agent](https://github.com/hiransuresh/monday-bi-agent)
 
 ---
-
-## 🏛️ System Architecture
-```text
-User / Founder Inquiry (Natural Language)
-               │
-               ▼
-┌───────────────────────────────────────────────────────────┐
-│                 Streamlit Web Interface                  │
-└─────────────────────────────┬─────────────────────────────┘
-                              │
-                              ▼
-┌───────────────────────────────────────────────────────────┐
-│                   Gemini Query Planner                    │
-│     (Classifies Scope, Metric Intent & Sector Filters)    │
-└─────────────────────────────┬─────────────────────────────┘
-                              │
-                              ▼
-┌───────────────────────────────────────────────────────────┐
-│               Monday.com GraphQL API v2                   │
-│          (Live Read-Only Cursor Pagination)               │
-└─────────────────────────────┬─────────────────────────────┘
-                              │
-                              ▼
-┌───────────────────────────────────────────────────────────┐
-│             Normalization & Resilient Parsing             │
-│     (Strips Duplicate Headers, Resolves Types & Nulls)    │
-└─────────────────────────────┬─────────────────────────────┘
-                              │
-                              ▼
-┌───────────────────────────────────────────────────────────┐
-│               Deterministic Python BI Engine              │
-│     (Calculates Weighted Pipeline, Collections & AR)      │
-└─────────────────────────────┬─────────────────────────────┘
-                              │
-                              ▼
-┌───────────────────────────────────────────────────────────┐
-│                 Gemini Executive Briefing                 │
-│     (Synthesizes Structured Numbers into Action Items)    │
-└───────────────────────────────────────────────────────────┘
+---
 
 ## ✨ Core Features & Highlights
 
@@ -87,3 +49,43 @@ User / Founder Inquiry (Natural Language)
 ```bash
 git clone [https://github.com/hiransuresh/monday-bi-agent.git](https://github.com/hiransuresh/monday-bi-agent.git)
 cd monday-bi-agent
+
+## 🏛️ System Architecture
+```text
+          User / Founder Inquiry (Natural Language)
+                             │
+                             ▼
+┌───────────────────────────────────────────────────────────┐
+│                 Streamlit Web Interface                   │
+└─────────────────────────────┬─────────────────────────────┘
+                              │
+                              ▼
+┌───────────────────────────────────────────────────────────┐
+│                   Gemini Query Planner                    │
+│     (Classifies Scope, Metric Intent & Sector Filters)    │
+└─────────────────────────────┬─────────────────────────────┘
+                              │
+                              ▼
+┌───────────────────────────────────────────────────────────┐
+│               Monday.com GraphQL API v2                   │
+│          (Live Read-Only Cursor Pagination)               │
+└─────────────────────────────┬─────────────────────────────┘
+                              │
+                              ▼
+┌───────────────────────────────────────────────────────────┐
+│             Normalization & Resilient Parsing             │
+│     (Strips Duplicate Headers, Resolves Types & Nulls)    │
+└─────────────────────────────┬─────────────────────────────┘
+                              │
+                              ▼
+┌───────────────────────────────────────────────────────────┐
+│               Deterministic Python BI Engine              │
+│     (Calculates Weighted Pipeline, Collections & AR)      │
+└─────────────────────────────┬─────────────────────────────┘
+                              │
+                              ▼
+┌───────────────────────────────────────────────────────────┐
+│                 Gemini Executive Briefing                 │
+│     (Synthesizes Structured Numbers into Action Items)    │
+└───────────────────────────────────────────────────────────┘
+
