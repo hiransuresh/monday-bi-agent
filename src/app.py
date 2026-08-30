@@ -4,13 +4,16 @@ Interactive Streamlit Application connecting dynamically to Monday.com.
 """
 
 import os
+import sys
 import streamlit as st
 import pandas as pd
 from dotenv import load_dotenv
 
+# Ensure root directory is in sys.path
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
+
 from src.monday_client import MondayDataClient
 from src.agent import SkylarkBIAgent
-from src.normalization import normalize_deals_df, normalize_work_orders_df
 from src.metrics import audit_data_quality
 
 # Load environment variables
@@ -60,6 +63,8 @@ refresh_btn = st.sidebar.button("🔄 Refresh Data from Monday.com", use_contain
 # ---------------------------------------------------------
 @st.cache_data(ttl=300, show_spinner=False)
 def get_cached_board_data(token: str, deals_id: str, wo_id: str):
+    from src.normalization import normalize_deals_df, normalize_work_orders_df
+
     if not token or not deals_id or not wo_id:
         return None, None, {"status": "unconfigured", "message": "Missing credentials or Board IDs."}
 
