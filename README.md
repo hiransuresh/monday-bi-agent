@@ -13,9 +13,6 @@ An AI-powered Business Intelligence Agent that answers founder-level commercial 
 ---
 
 ## 🏛️ System Architecture
-## 🏛️ System Architecture
-
-```mermaid
 flowchart TD
     User([👤 User / Founder Inquiry]) --> UI[💻 Streamlit Web Interface]
     UI --> Planner[🧠 Gemini Query Planner<br/><i>Intent, Scope & Filters</i>]
@@ -31,7 +28,6 @@ flowchart TD
     
     classDef highlight fill:#1E293B,stroke:#38BDF8,stroke-width:2px,color:#F8FAFC;
     class UI,Planner,Monday,Norm,Engine,Synthesis highlight;
-```
 ---
 
 ## ✨ Core Features & Highlights
