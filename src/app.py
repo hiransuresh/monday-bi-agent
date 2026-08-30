@@ -17,13 +17,20 @@ import streamlit as st
 import pandas as pd
 from dotenv import load_dotenv
 
+# Load local .env file
 load_dotenv()
 
-# Read secrets safely from Streamlit secrets or OS environment
+# Safe secret lookup: checks environment variables first, then Streamlit Secrets
 def get_secret(key: str, default: str = "") -> str:
-    if hasattr(st, "secrets") and key in st.secrets:
-        return str(st.secrets[key]).strip()
-    return os.getenv(key, default).strip()
+    env_val = os.getenv(key)
+    if env_val:
+        return str(env_val).strip()
+    try:
+        if hasattr(st, "secrets") and key in st.secrets:
+            return str(st.secrets[key]).strip()
+    except Exception:
+        pass
+    return default
 
 # Resilient imports supporting direct execution inside src/
 try:
@@ -116,7 +123,7 @@ st.sidebar.subheader("📡 Data Feed Health")
 if isinstance(conn_status, dict) and conn_status.get("status") == "connected":
     st.sidebar.success(f"Connected to Monday.com API\n\n• Deals Board: `{len(deals_df)} items`\n• Work Orders: `{len(wo_df)} items`")
 elif isinstance(conn_status, dict) and conn_status.get("status") == "unconfigured":
-    st.sidebar.warning("⚠️ Credentials not configured in Streamlit Secrets.")
+    st.sidebar.warning("⚠️ Credentials not configured in .env or sidebar.")
 else:
     err_text = conn_status.get("message", "Unknown error") if isinstance(conn_status, dict) else str(conn_status)
     st.sidebar.error(f"❌ Connection Error: {err_text}")
