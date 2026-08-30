@@ -1,14 +1,12 @@
 # Skylark Drones — Monday.com Executive BI Agent
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://monday-bi-agent-tpkw9goarvf7avfcbrzjtc.streamlit.app/)
-
 An AI-powered Business Intelligence Agent that answers founder-level commercial and operational queries by querying live Monday.com Deals and Work Orders boards dynamically via GraphQL API v2.
 
 ---
 
 ## 🌐 Live Hosted Prototype
-- **Live URL**: [https://monday-bi-agent-tpkw9goarvf7avfcbrzjtc.streamlit.app/](https://monday-bi-agent-tpkw9goarvf7avfcbrzjtc.streamlit.app/)
-- **GitHub Repository**: [https://github.com/hiransuresh/monday-bi-agent](https://github.com/hiransuresh/monday-bi-agent)
+- **Live URL**: https://monday-bi-agent-sjujp4aq2agyq6zdm6szrc.streamlit.app/
+- **GitHub Repository**: https://github.com/hiransuresh/monday-bi-agent
 
 ---
 ---
