@@ -13,37 +13,25 @@ An AI-powered Business Intelligence Agent that answers founder-level commercial 
 ---
 
 ## 🏛️ System Architecture
-User / Founder Query (Natural Language)
-│
-▼
-┌───────────────────────────────┐
-│   Streamlit Web Interface     │  ◄── Live Monday Data Feed Monitor
-└──────────────┬────────────────┘
-│
-▼
-┌───────────────────────────────┐
-│     Gemini Query Planner      │  ◄── Classifies Intent, Scope & Filters
-└──────────────┬────────────────┘
-│
-▼
-┌───────────────────────────────┐
-│    Monday.com GraphQL v2      │  ◄── Read-Only Dynamic Cursor Pagination
-└──────────────┬────────────────┘
-│
-▼
-┌───────────────────────────────┐
-│  Normalization & Resilience   │  ◄── Strips Header Duplicates, Handles Nulls
-└──────────────┬────────────────┘
-│
-▼
-┌───────────────────────────────┐
-│   Deterministic BI Engine     │  ◄── Pure Python Math (Weighted Pipeline, AR)
-└──────────────┬────────────────┘
-│
-▼
-┌───────────────────────────────┐
-│   Gemini Executive Briefing   │  ◄── Formats Numbers into Actionable Insights
-└───────────────────────────────┘
+## 🏛️ System Architecture
+
+```mermaid
+flowchart TD
+    User([👤 User / Founder Inquiry]) --> UI[💻 Streamlit Web Interface]
+    UI --> Planner[🧠 Gemini Query Planner<br/><i>Intent, Scope & Filters</i>]
+    
+    subgraph Data_Pipeline [Live Data & Analytics Engine]
+        Monday[☁️ Monday.com GraphQL API v2<br/><i>Cursor-based Pagination</i>] --> Norm[🧹 Normalization Layer<br/><i>Header Cleansing & Type Safety</i>]
+        Norm --> Engine[⚡ Deterministic Python BI Engine<br/><i>Pure Math: Weighted Pipeline & AR</i>]
+    end
+    
+    Planner --> Monday
+    Engine --> Synthesis[✨ Gemini Executive Synthesis<br/><i>Founder-Grade Briefing</i>]
+    Synthesis --> UI
+    
+    classDef highlight fill:#1E293B,stroke:#38BDF8,stroke-width:2px,color:#F8FAFC;
+    class UI,Planner,Monday,Norm,Engine,Synthesis highlight;
+```
 ---
 
 ## ✨ Core Features & Highlights
