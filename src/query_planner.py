@@ -16,13 +16,14 @@ PLANNER_SYSTEM_PROMPT = """You are an expert BI Query Planner for Skylark Drones
 Analyze the user's question and map it to a structured JSON query plan.
 
 Available Boards:
-1. 'deals': Sales pipeline, stages, won/lost/dead/open status, probability, weighted pipeline, deal values.
+1. 'deals': Sales pipeline, stages, won/lost/dead/open status, probability, weighted pipeline, deal values, top deals.
 2. 'work_orders': Execution status, project delivery, contracted amounts, billing status, collected amounts, receivables, at-risk projects.
 3. 'cross_board': Combined commercial and operational performance, company-wide leadership briefings, sector-level end-to-end view.
 
 Valid Metrics:
 - 'pipeline_summary'
 - 'weighted_pipeline'
+- 'top_open_deals'
 - 'deals_by_sector'
 - 'deals_by_stage'
 - 'won_lost_summary'
@@ -50,7 +51,8 @@ class QueryPlanner:
     """Plans and structures user queries for deterministic metric execution."""
 
     def __init__(self, api_key: Optional[str] = None):
-        self.api_key = api_key or os.getenv("GEMINI_API_KEY", "")
+        raw_key = api_key or os.getenv("GEMINI_API_KEY", "")
+        self.api_key = raw_key.strip().strip("'").strip('"')
         self.client = None
         if self.api_key:
             try:
@@ -61,21 +63,21 @@ class QueryPlanner:
     def plan_query(self, user_query: str) -> Dict[str, Any]:
         """Convert natural language query to structured plan via Gemini or heuristics."""
         if self.client:
-            try:
-                response = self.client.models.generate_content(
-                    model="gemini-2.5-flash",
-                    contents=user_query,
-                    config=types.GenerateContentConfig(
-                        system_instruction=PLANNER_SYSTEM_PROMPT,
-                        response_mime_type="application/json",
-                        temperature=0.1,
-                    ),
-                )
-                if response.text:
-                    return json.loads(response.text)
-            except Exception:
-                # Graceful fallback to deterministic heuristics
-                pass
+            for model_name in ["gemini-2.5-flash", "gemini-1.5-flash", "gemini-2.0-flash"]:
+                try:
+                    response = self.client.models.generate_content(
+                        model=model_name,
+                        contents=user_query,
+                        config=types.GenerateContentConfig(
+                            system_instruction=PLANNER_SYSTEM_PROMPT,
+                            response_mime_type="application/json",
+                            temperature=0.1,
+                        ),
+                    )
+                    if response.text:
+                        return json.loads(response.text)
+                except Exception:
+                    continue
 
         return self._heuristic_planner(user_query)
 
@@ -130,6 +132,17 @@ class QueryPlanner:
                 "status_filter": None,
                 "is_leadership_summary": False,
                 "user_intent_summary": f"Calculate {metric} for work orders{f' in {sector}' if sector else ''}.",
+            }
+
+        # Top / Biggest deals intent (ADDED HERE)
+        if any(k in q for k in ["biggest", "largest", "top deals", "top opportunities", "highest deal", "highest value"]):
+            return {
+                "board_scope": "deals",
+                "metric": "top_open_deals",
+                "sector_filter": sector,
+                "status_filter": "Open",
+                "is_leadership_summary": False,
+                "user_intent_summary": "Identify highest-value open pipeline opportunities.",
             }
 
         # Deals pipeline intent (default)

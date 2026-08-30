@@ -95,7 +95,6 @@ def calculate_deals_by_sector(df: pd.DataFrame) -> Dict[str, Any]:
     if open_deals.empty:
         return {"sector_breakdown": [], "top_sector": "None", "caveats": ["No open deals found."]}
 
-    # Identify primary identifier column safely
     name_col = "Deal_Name" if "Deal_Name" in open_deals.columns else ("Item Name" if "Item Name" in open_deals.columns else open_deals.columns[0])
 
     sector_summary = (
@@ -126,13 +125,14 @@ def calculate_deals_by_stage(df: pd.DataFrame, sector: Optional[str] = None) -> 
     if sector and sector != "All":
         filtered = filtered[filtered["Sector"].astype(str).str.lower() == sector.lower()]
 
+    name_col = "Deal_Name" if "Deal_Name" in filtered.columns else ("Item Name" if "Item Name" in filtered.columns else filtered.columns[0])
+
     stage_summary = (
-        filtered.groupby("Deal Stage")
+        filtered.groupby("Deal Stage", as_index=False)
         .agg(
-            count=("Deal Name", "count"),
+            count=(name_col, "count"),
             total_value=("Deal_Value", "sum")
         )
-        .reset_index()
         .sort_values(by="count", ascending=False)
     )
 
@@ -140,6 +140,35 @@ def calculate_deals_by_stage(df: pd.DataFrame, sector: Optional[str] = None) -> 
         "sector_filter": sector or "All",
         "stage_breakdown": stage_summary.to_dict(orient="records"),
         "caveats": []
+    }
+
+
+def calculate_top_open_deals(df: pd.DataFrame, top_n: int = 5) -> Dict[str, Any]:
+    """Retrieve the highest-value open sales opportunities."""
+    if df.empty:
+        return {"error": "Deals board is empty"}
+
+    open_deals = df[df["Deal Status"] == "Open"].copy()
+    valid_deals = open_deals.dropna(subset=["Deal_Value"]).sort_values(by="Deal_Value", ascending=False)
+
+    top_list = []
+    for _, row in valid_deals.head(top_n).iterrows():
+        top_list.append({
+            "deal_name": row.get("Deal_Name", row.get("Deal Name", row.get("Item Name", "Unknown"))),
+            "client": row.get("Client Code", "Unknown"),
+            "sector": row.get("Sector", "Unspecified"),
+            "deal_value": float(row.get("Deal_Value", 0.0)),
+            "probability": row.get("Closure_Probability_Raw", "Unspecified"),
+            "stage": row.get("Deal Stage", "Unassigned")
+        })
+
+    return {
+        "top_n": top_n,
+        "total_open_deals_evaluated": len(valid_deals),
+        "top_open_deals": top_list,
+        "caveats": [
+            f"Excludes {open_deals['Deal_Value'].isna().sum()} open deals with unpopulated deal values."
+        ]
     }
 
 
