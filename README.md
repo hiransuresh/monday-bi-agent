@@ -13,22 +13,43 @@ An AI-powered Business Intelligence Agent that answers founder-level commercial 
 ---
 
 ## 🏛️ System Architecture
-flowchart TD
-    User([👤 User / Founder Inquiry]) --> UI[💻 Streamlit Web Interface]
-    UI --> Planner[🧠 Gemini Query Planner<br/><i>Intent, Scope & Filters</i>]
-    
-    subgraph Data_Pipeline [Live Data & Analytics Engine]
-        Monday[☁️ Monday.com GraphQL API v2<br/><i>Cursor-based Pagination</i>] --> Norm[🧹 Normalization Layer<br/><i>Header Cleansing & Type Safety</i>]
-        Norm --> Engine[⚡ Deterministic Python BI Engine<br/><i>Pure Math: Weighted Pipeline & AR</i>]
-    end
-    
-    Planner --> Monday
-    Engine --> Synthesis[✨ Gemini Executive Synthesis<br/><i>Founder-Grade Briefing</i>]
-    Synthesis --> UI
-    
-    classDef highlight fill:#1E293B,stroke:#38BDF8,stroke-width:2px,color:#F8FAFC;
-    class UI,Planner,Monday,Norm,Engine,Synthesis highlight;
----
+```text
+User / Founder Inquiry (Natural Language)
+               │
+               ▼
+┌───────────────────────────────────────────────────────────┐
+│                 Streamlit Web Interface                  │
+└─────────────────────────────┬─────────────────────────────┘
+                              │
+                              ▼
+┌───────────────────────────────────────────────────────────┐
+│                   Gemini Query Planner                    │
+│     (Classifies Scope, Metric Intent & Sector Filters)    │
+└─────────────────────────────┬─────────────────────────────┘
+                              │
+                              ▼
+┌───────────────────────────────────────────────────────────┐
+│               Monday.com GraphQL API v2                   │
+│          (Live Read-Only Cursor Pagination)               │
+└─────────────────────────────┬─────────────────────────────┘
+                              │
+                              ▼
+┌───────────────────────────────────────────────────────────┐
+│             Normalization & Resilient Parsing             │
+│     (Strips Duplicate Headers, Resolves Types & Nulls)    │
+└─────────────────────────────┬─────────────────────────────┘
+                              │
+                              ▼
+┌───────────────────────────────────────────────────────────┐
+│               Deterministic Python BI Engine              │
+│     (Calculates Weighted Pipeline, Collections & AR)      │
+└─────────────────────────────┬─────────────────────────────┘
+                              │
+                              ▼
+┌───────────────────────────────────────────────────────────┐
+│                 Gemini Executive Briefing                 │
+│     (Synthesizes Structured Numbers into Action Items)    │
+└───────────────────────────────────────────────────────────┘
 
 ## ✨ Core Features & Highlights
 
